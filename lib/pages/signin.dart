@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chats/pages/api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(SignIn());
 
@@ -31,6 +32,16 @@ class SignInn extends State<Signins>{
 
   String Username = '';
   String Password = '';
+
+  _setString() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('username', Username);
+    Navigator.pop(context);
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Api())
+    );
+  }
  @override
  Widget build(BuildContext context) {
     // TODO: implement build
@@ -68,10 +79,7 @@ class SignInn extends State<Signins>{
           ),
           RaisedButton(
             onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Api())
-              );
+              _setString();
             },
             child: Text('Sign In!'),
           ),

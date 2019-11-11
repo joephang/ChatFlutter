@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'package:chats/main.dart';
+import 'package:chats/pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(Api());
 
@@ -11,8 +14,10 @@ class Api extends StatefulWidget {
 
 var loading = false;
 List list = List();
+var username;
 
 class APIBody extends State<Api> {
+
   _apiGet() async {
     setState(() {
       loading = true;
@@ -32,9 +37,15 @@ class APIBody extends State<Api> {
     }
   }
 
+  _getLocal() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String local = prefs.getString('username');
+    print(local);
+  }
+
   @override
 
-  void initState() {
+  initState() {
     super.initState();
     _apiGet();
   }
@@ -46,8 +57,11 @@ class APIBody extends State<Api> {
         title: Text('API GET'),
         leading: IconButton(
             icon: Icon(Icons.arrow_back),
-            onPressed: (){
-              Navigator.pop(context, 'Hehe');
+            onPressed: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+
+              prefs.setString('username', null);
+              Navigator.pop(context);
             }
         ),
       ),
@@ -77,7 +91,7 @@ class APIBody extends State<Api> {
             ),
             title: Text(list[index]['title']),
             onTap: () {
-              print('Go To Details Page');
+              _getLocal();
             },
           );
         },
