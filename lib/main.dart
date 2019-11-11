@@ -9,16 +9,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(MyApp());
 
+var logged = false;
+var loading = true;
+
 class MyApp extends StatefulWidget {
   @override
   _MyHomePage createState() => _MyHomePage();
 }
 
 class _MyHomePage extends State<MyApp>{
-
-  var logged = false;
-  var loading = true;
-  var loops;
 
   userName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -36,11 +35,17 @@ class _MyHomePage extends State<MyApp>{
 
     userName().then((result) => {
       if(result == null){
-        logged = false,
-        loading = false
+        this.setState(
+            (){
+              loading = false;
+              logged = false;
+            }
+        )
       } else {
-        logged = true,
-        loading = false
+        this.setState((){
+          logged = true;
+          loading = false;
+        })
       }
     });
   }
