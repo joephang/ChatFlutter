@@ -92,6 +92,7 @@ class APIBody extends State<Api> {
             title: Text(list[index]['title']),
             onTap: () {
               _getLocal();
+              print(list[index]);
             },
           );
         },

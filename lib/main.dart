@@ -47,32 +47,13 @@ class _MyHomePage extends State<MyApp>{
 
   Widget build(BuildContext context) {
     // TODO: implement build
-    if(loading == true){
-      print('Ini Loading di true $loading');
-      return MaterialApp(
-        title: 'Chats App',
-        theme: ThemeData.dark(),
-        home: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    } else {
-      print('Ini Loading di else $loading');
-      if(logged == true){
-        print(logged);
-        return MaterialApp(
-          title: 'Chats App',
-          theme: ThemeData.dark(),
-          home: Api()
-        );
-      } else {
-        print(logged);
-        return MaterialApp(
-            title: 'Chats App',
-            theme: ThemeData.dark(),
-            home: HomeBody()
-        );
-      }
-    }
+
+    return(MaterialApp(
+      title: 'Chats App',
+      theme: ThemeData.dark(),
+      home: loading ? Center(
+        child: CircularProgressIndicator(),
+      ) : logged ? Api() : HomeBody(),
+    ));
   }
 }
