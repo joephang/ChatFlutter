@@ -9,15 +9,6 @@ class SignIn extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context, ':(');
-          },
-        ),
-        title: Text('Sign In'),
-      ),
       body: Signins(),
     );
   }
@@ -30,23 +21,25 @@ class Signins extends StatefulWidget {
 
 class SignInn extends State<Signins>{
 
-  String Username = '';
-  String Password = '';
+  String Username = null;
+  String Password = null;
 
   _setString() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('username', Username);
-    Navigator.pop(context);
-    Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Api())
-    );
+    if(Username != null && Password != null){
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('username', Username);
+      Navigator.pushReplacementNamed(context, "/api");
+    } else {
+      print('Masih kosong :(');
+    }
   }
+
  @override
  Widget build(BuildContext context) {
     // TODO: implement build
     return Center(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -77,12 +70,29 @@ class SignInn extends State<Signins>{
               },
             ),
           ),
-          RaisedButton(
-            onPressed: () {
-              _setString();
-            },
-            child: Text('Sign In!'),
-          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: RaisedButton(
+                  onPressed: () {
+                    _setString();
+                  },
+                  child: Text('Sign In!'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: RaisedButton(
+                  onPressed: (){
+                    Navigator.pushNamed(context, '/signup');
+                  },
+                  child: Text('Sign Up!'),
+                ),
+              )
+            ],
+          )
         ],
       ),
     );

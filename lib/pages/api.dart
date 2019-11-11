@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:chats/main.dart';
+import 'package:chats/pages/Details.dart';
 import 'package:chats/pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() => runApp(Api());
 
@@ -55,15 +57,25 @@ class APIBody extends State<Api> {
     return Scaffold(
       appBar: AppBar(
         title: Text('API GET'),
-        leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
+        leading: InkWell(
+          onTap: () async {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
 
-              prefs.setString('username', null);
-              Navigator.pop(context);
-            }
-        ),
+            prefs.setString('username', null);
+            Navigator.pushReplacementNamed(context, "/signin");
+          },
+          child: Center(
+            child: Text('Log Out'),
+          ),
+          onLongPress: () async {
+            await Fluttertoast.showToast(
+              msg: 'This is Warning',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIos: 1,
+            );
+          },
+        )
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -91,8 +103,12 @@ class APIBody extends State<Api> {
             ),
             title: Text(list[index]['title']),
             onTap: () {
-              _getLocal();
-              print(list[index]);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Details(list: list, num: index,),
+                ),
+              );
             },
           );
         },

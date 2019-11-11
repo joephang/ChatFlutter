@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chats/pages/Details.dart';
 import 'package:flutter/material.dart';
 import 'package:chats/pages/signup.dart';
 import 'package:chats/pages/signin.dart';
@@ -58,7 +59,14 @@ class _MyHomePage extends State<MyApp>{
       theme: ThemeData.dark(),
       home: loading ? Center(
         child: CircularProgressIndicator(),
-      ) : logged ? Api() : HomeBody(),
+      ) : logged ? Api() : SignIn(),
+      routes: {
+        '/home' : (_) => HomeBody(),
+        '/signin' : (_) => SignIn(),
+        '/signup' : (_) => SignUps(),
+        '/api' : (_) => Api(),
+        '/details' : (_) => Details()
+      },
     ));
   }
 }
