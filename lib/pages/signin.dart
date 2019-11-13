@@ -33,9 +33,9 @@ class SignInn extends State<Signins>{
     if(Username != null && Password != null){
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      prefs.setString('local', '192.168.0.106');
-
       final String local = prefs.getString('local');
+
+      print(local);
 
         final res = await http.post(
             'http://$local:8081/api/user/login',

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chats/pages/Details.dart';
+import 'package:chats/pages/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:chats/pages/signup.dart';
 import 'package:chats/pages/signin.dart';
@@ -26,13 +27,17 @@ class _MyHomePage extends State<MyApp>{
     return username;
   }
 
+  setLocal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('local', '192.168.0.106');
+  }
+
   @override
 
   initState() {
     super.initState();
-//    loops = Timer.periodic(Duration(seconds: 1), (timer){
-//
-//    });
+
+    setLocal();
 
     userName().then((result) => {
       if(result == null){
@@ -65,7 +70,8 @@ class _MyHomePage extends State<MyApp>{
         '/signin' : (_) => SignIn(),
         '/signup' : (_) => SignUps(),
         '/api' : (_) => Api(),
-        '/details' : (_) => Details()
+        '/details' : (_) => Details(),
+        '/profile' : (_) => Profile()
       },
     ));
   }

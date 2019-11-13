@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:chats/main.dart';
 import 'package:chats/pages/Details.dart';
-import 'package:chats/pages/Home.dart';
+import 'package:chats/pages/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,17 +14,20 @@ class Api extends StatefulWidget {
   APIBody createState() => APIBody();
 }
 
+final lol = [{"username":"joe","password":"Admin!23","phone":"081919292825","name":"Joe Phang Rahmansyah"}];
 var loading = false;
 List list = List();
 var username;
+List profile = List();
 
 class APIBody extends State<Api> {
 
   userName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String username = prefs.getString('username');
-    print(username);
-    return username;
+    String Username = prefs.getString('username');
+    this.setState((){
+      username = Username;
+    });
   }
 
   _apiGet() async {
@@ -36,8 +39,8 @@ class APIBody extends State<Api> {
     if(res.statusCode == 200){
       setState(() {
         list = json.decode(res.body) as List;
-        loading = false;
       });
+      _profileGet();
     } else {
       setState(() {
         loading = false;
@@ -46,10 +49,18 @@ class APIBody extends State<Api> {
     }
   }
 
-  _getLocal() async{
+  _profileGet() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String local = prefs.getString('username');
-    print(local);
+    final String local = prefs.getString('local');
+
+    final res = await http.get('http://$local:8081/api/user/$username');
+
+    if(res.statusCode == 200){
+      setState(() {
+        profile = json.decode(res.body) as List;
+        loading = false;
+      });
+    }
   }
 
   @override
@@ -57,11 +68,7 @@ class APIBody extends State<Api> {
   initState() {
     super.initState();
     _apiGet();
-    userName().then((res) => {
-      this.setState((){
-        username = res;
-      })
-    });
+    userName();
   }
 
   Widget build(BuildContext context) {
@@ -76,15 +83,34 @@ class APIBody extends State<Api> {
               onTap: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
 
-                prefs.setString('username', null);
-                Navigator.pushReplacementNamed(context, "/signin");
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('SignOut?'),
+                        content: Text('Are you sure to SignOut?'),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text('No'),
+                            onPressed: (){
+                              Navigator.pop(context);
+                            },
+                          ),
+                          FlatButton(
+                            child: Text('Yes'),
+                            onPressed: (){
+                              prefs.setString('username', null);
+                              Navigator.pushReplacementNamed(context, "/signin");
+                            },
+                          ),
+                        ],
+                      );
+                    }
+                );
               },
               child: Center(
                 child: Text('Log Out'),
               ),
-              onLongPress: () async {
-
-              },
             ),
           )
         ],
@@ -99,18 +125,17 @@ class APIBody extends State<Api> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(120.0),
+                      borderRadius: BorderRadius.circular(60.0),
                       child: Image.network(
                           'https://scontent-sin6-1.cdninstagram.com/vp/5b0e2e1bc48ff972eba078bb63151a4a/5E8A2771/t51.2885-19/s150x150/75366265_426971247982562_503909228436520960_n.jpg?_nc_ht=scontent-sin6-1.cdninstagram.com&_nc_cat=102',
-                          height: 120.0,
-                          width: 120.0,
+                          height: 60.0,
+                          width: 60.0,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(15.0),
-                      child: Text('$username'),
+                      child: profile.length == 0 ? Text('Hai') :  Text(profile[0]['name']),
                     ),
-
                   ],
                 ),
               ),
@@ -122,7 +147,13 @@ class APIBody extends State<Api> {
               leading: Icon(Icons.person),
               title: Text('Profile'),
               onTap: () {
-                Toast.show('Directing to Profile!', context);
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Profile(profiled: profile,),
+                  ),
+                );
               },
             ),
             ListTile(
