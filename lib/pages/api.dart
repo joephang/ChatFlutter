@@ -5,7 +5,7 @@ import 'package:chats/pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:toast/toast.dart';
 
 void main() => runApp(Api());
 
@@ -19,6 +19,13 @@ List list = List();
 var username;
 
 class APIBody extends State<Api> {
+
+  userName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String username = prefs.getString('username');
+    print(username);
+    return username;
+  }
 
   _apiGet() async {
     setState(() {
@@ -50,6 +57,11 @@ class APIBody extends State<Api> {
   initState() {
     super.initState();
     _apiGet();
+    userName().then((res) => {
+      this.setState((){
+        username = res;
+      })
+    });
   }
 
   Widget build(BuildContext context) {
@@ -57,36 +69,77 @@ class APIBody extends State<Api> {
     return Scaffold(
       appBar: AppBar(
         title: Text('API GET'),
-        leading: InkWell(
-          onTap: () async {
-            SharedPreferences prefs = await SharedPreferences.getInstance();
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: InkWell(
+              onTap: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
 
-            prefs.setString('username', null);
-            Navigator.pushReplacementNamed(context, "/signin");
-          },
-          child: Center(
-            child: Text('Log Out'),
-          ),
-          onLongPress: () async {
-            await Fluttertoast.showToast(
-              msg: 'This is Warning',
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.CENTER,
-              timeInSecForIos: 1,
-            );
-          },
-        )
+                prefs.setString('username', null);
+                Navigator.pushReplacementNamed(context, "/signin");
+              },
+              child: Center(
+                child: Text('Log Out'),
+              ),
+              onLongPress: () async {
+
+              },
+            ),
+          )
+        ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: RaisedButton(
-          onPressed: () {
-            _apiGet();
-            },
-          child: Container(
-            child: Text('API Get'),
-          ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(120.0),
+                      child: Image.network(
+                          'https://scontent-sin6-1.cdninstagram.com/vp/5b0e2e1bc48ff972eba078bb63151a4a/5E8A2771/t51.2885-19/s150x150/75366265_426971247982562_503909228436520960_n.jpg?_nc_ht=scontent-sin6-1.cdninstagram.com&_nc_cat=102',
+                          height: 120.0,
+                          width: 120.0,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Text('$username'),
+                    ),
+
+                  ],
+                ),
+              ),
+              decoration: BoxDecoration(
+                color: Colors.blue
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Profile'),
+              onTap: () {
+                Toast.show('Directing to Profile!', context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.person_add),
+              title: Text('Add Friend!'),
+              onTap: (){
+                Toast.show('Add Friend :3', context);
+              },
+            )
+          ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            _apiGet();
+          },
+        child: Icon(Icons.add),
       ),
       body: loading ? Center(
           child: CircularProgressIndicator(),
@@ -95,7 +148,7 @@ class APIBody extends State<Api> {
         itemBuilder: (BuildContext context, int index){
           return ListTile(
             contentPadding: EdgeInsets.all(8.0),
-            trailing: Image.network(
+            leading: Image.network(
               list[index]['thumbnailUrl'],
               fit: BoxFit.cover,
               height: 40.0,
