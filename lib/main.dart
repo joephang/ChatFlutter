@@ -23,21 +23,14 @@ class _MyHomePage extends State<MyApp>{
 
   userName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String username = prefs.getString('username');
+    String username = prefs.getString('email');
     return username;
-  }
-
-  setLocal() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('local', '192.168.0.106');
   }
 
   @override
 
   initState() {
     super.initState();
-
-    setLocal();
 
     userName().then((result) => {
       if(result == null){
@@ -59,20 +52,21 @@ class _MyHomePage extends State<MyApp>{
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    return(MaterialApp(
-      title: 'Chats App',
-      theme: ThemeData.dark(),
-      home: loading ? Center(
-        child: CircularProgressIndicator(),
-      ) : logged ? Api() : SignIn(),
-      routes: {
-        '/home' : (_) => HomeBody(),
-        '/signin' : (_) => SignIn(),
-        '/signup' : (_) => SignUps(),
-        '/api' : (_) => Api(),
-        '/details' : (_) => Details(),
-        '/profile' : (_) => Profile()
-      },
-    ));
+    return(
+        MaterialApp(
+          title: 'Chats App',
+          routes: {
+            '/home' : (_) => HomeBody(),
+            '/signin' : (_) => SignIn(),
+            '/signup' : (_) => SignUps(),
+            '/api' : (_) => Api(),
+          },
+          theme: ThemeData.dark(),
+          home: loading ? Center(
+            child: CircularProgressIndicator(),
+          ) : logged ? Api() : SignIn(),
+
+        )
+    );
   }
 }

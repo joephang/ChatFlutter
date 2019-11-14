@@ -3,11 +3,14 @@ import 'package:chats/pages/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:toast/toast.dart';
+import 'dart:convert';
 
 void main() => runApp(SignIn());
 
-String Username = null;
+String email = null;
 String Password = null;
+bool loading = false;
+List token = List();
 
 final TextEditingController userController = TextEditingController();
 final TextEditingController passController = TextEditingController();
@@ -30,60 +33,56 @@ class Signins extends StatefulWidget {
 class SignInn extends State<Signins>{
 
   _setString() async {
-    if(Username != null && Password != null){
+
+    setState(() {
+      loading=true;
+    });
+
+    if(email != null && Password != null){
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      final String local = prefs.getString('local');
-
-      print(local);
-
         final res = await http.post(
-            'http://$local:8081/api/user/login',
+            'https://test1-messenger-api.herokuapp.com/api/login',
             body: {
-              'username' : Username,
+              'email' : email,
               'password' : Password
             }
         );
 
         switch(res.statusCode){
           case 200: {
+            setState(() {
+              token = json.decode(res.body) as List;
+            });
+            prefs.setString('token', token[0]['token']);
+
+            final tok = await prefs.getString('token');
+
+            print(tok);
+
             Navigator.pushReplacementNamed(context, "/api");
-            prefs.setString('username', Username);
-            print(Username);
-            this.setState((){
+            prefs.setString('email', email);
+
+            setState((){
               userController.clear();
               passController.clear();
-              Username = null;
+              email = null;
               Password = null;
+              loading = false;
             });
-            Toast.show("Berhasil", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
-            print('Berhasil!');
-          }
-          break;
-          case 403: {
-            this.setState((){
-              passController.clear();
-              Password = null;
-            });
-            Toast.show("Wrong Password!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
-          }
-          break;
-          case 404: {
-            this.setState((){
-              userController.clear();
-              passController.clear();
-              Username = null;
-            });
-            Toast.show("User Not Found!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+
+            Toast.show("Signed In!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
           }
           break;
           default:{
             this.setState((){
               userController.clear();
               passController.clear();
-              Username = null;
+              email = null;
+              Password = null;
+              loading = false;
             });
-            Toast.show("Cannot Login!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+            Toast.show("Please re-check your email and password!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
           }
           break;
         }
@@ -96,7 +95,7 @@ class SignInn extends State<Signins>{
  Widget build(BuildContext context) {
     // TODO: implement build
     return Center(
-      child: Column(
+      child: loading ? CircularProgressIndicator() : Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Padding(
@@ -109,7 +108,7 @@ class SignInn extends State<Signins>{
               ),
               onChanged: (text) {
                 setState(() {
-                  Username = text;
+                  email = text;
                 });
               },
             ),

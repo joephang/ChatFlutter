@@ -33,39 +33,33 @@ class SignUpBody extends State<SignUp> {
   @override
 
   String name = '';
-  String username = '';
+  String email = '';
   String password = '';
-  String phone = '';
 
   bool loading = false;
 
   _SignUp() async {
 
-    if(name != '' && username != '' && password != '' && phone != ''){
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-
-      final String local = prefs.getString('local');
-
+    if(name != '' && email != '' && password != ''){
       final res = await http.post(
-          'http://$local:8081/api/user/register',
+          'https://test1-messenger-api.herokuapp.com/api/users',
           body: {
-            'username' : username,
+            'name' : name,
+            'email' : email,
             'password' : password,
-            'phone' : phone,
-            'name' : name
           }
       );
 
       switch(res.statusCode){
-        case 200: {
-          Navigator.pop(context, ':(');
+        case 201: {
           setState(() {
-            username = '';
+            email = '';
             password = '';
-            phone = '';
             name = '';
+            loading=false;
           });
           Toast.show('Register Succeed!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+          Navigator.pop(context, ':(');
         }
         break;
         case 400 : {
@@ -90,11 +84,11 @@ class SignUpBody extends State<SignUp> {
             child: TextField(
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Username',
+                labelText: 'Email',
               ),
               onChanged: (text) {
                 setState(() {
-                  username = text;
+                  email = text;
                 });
               },
             ),
@@ -110,21 +104,6 @@ class SignUpBody extends State<SignUp> {
               onChanged: (text) {
                 setState(() {
                   password = text;
-                });
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Phone Number'
-              ),
-              onChanged: (text) {
-                setState(() {
-                  phone = text;
                 });
               },
             ),

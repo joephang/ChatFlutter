@@ -18,12 +18,10 @@ class Profile extends StatefulWidget {
 TextEditingController nameController = TextEditingController();
 TextEditingController usernameController = TextEditingController();
 TextEditingController passwordController = TextEditingController();
-TextEditingController phoneController = TextEditingController();
 
 var name = '';
 var username = '';
 var password = '';
-var phone = '';
 
 class _Profile extends State<Profile>{
 
@@ -38,7 +36,6 @@ class _Profile extends State<Profile>{
         body: {
           'name': name,
           'password': password,
-          'phone': phone
         });
 
     if(res.statusCode == 200){
@@ -59,14 +56,14 @@ class _Profile extends State<Profile>{
     super.initState();
     this.setState((){
       nameController = TextEditingController(text: profiles[0]['name']);
-      usernameController = TextEditingController(text: profiles[0]['username']);
+      usernameController = TextEditingController(text: profiles[0]['email']);
       passwordController = TextEditingController(text: profiles[0]['password']);
-      phoneController = TextEditingController(text: profiles[0]['phone']);
       name = profiles[0]['name'];
-      username = profiles[0]['username'];
+      username = profiles[0]['email'];
       password = profiles[0]['password'];
-      phone = profiles[0]['phone'];
     });
+
+    print(profiles[0]['email']);
   }
 
   Widget build(BuildContext context) {
@@ -138,7 +135,7 @@ class _Profile extends State<Profile>{
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'Username'
+                      labelText: 'Email'
                   ),
                   onChanged: (text) {
                     username=text;
@@ -148,7 +145,6 @@ class _Profile extends State<Profile>{
               ListTile(
                 leading: Icon(Icons.vpn_key),
                 title: TextField(
-                  controller: passwordController,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
                       border: OutlineInputBorder(),
@@ -156,20 +152,6 @@ class _Profile extends State<Profile>{
                   ),
                   onChanged: (text) {
                     password=text;
-                  },
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.phone),
-                title: TextField(
-                  controller: phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Phone'
-                  ),
-                  onChanged: (text) {
-                    phone=text;
                   },
                 ),
               ),

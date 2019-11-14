@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:chats/main.dart';
 import 'package:chats/pages/Details.dart';
 import 'package:chats/pages/profile.dart';
@@ -14,19 +15,18 @@ class Api extends StatefulWidget {
   APIBody createState() => APIBody();
 }
 
-final lol = [{"username":"joe","password":"Admin!23","phone":"081919292825","name":"Joe Phang Rahmansyah"}];
 var loading = false;
 List list = List();
-var username;
+var email;
 List profile = List();
 
 class APIBody extends State<Api> {
 
   userName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String Username = prefs.getString('username');
+    String Emails = prefs.getString('email');
     this.setState((){
-      username = Username;
+      email = Emails;
     });
   }
 
@@ -40,7 +40,8 @@ class APIBody extends State<Api> {
       setState(() {
         list = json.decode(res.body) as List;
       });
-      _profileGet();
+
+      getProfile();
     } else {
       setState(() {
         loading = false;
@@ -49,18 +50,21 @@ class APIBody extends State<Api> {
     }
   }
 
-  _profileGet() async {
+  getProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String local = prefs.getString('local');
 
-    final res = await http.get('http://$local:8081/api/user/$username');
+    final token = await prefs.getString('token');
 
-    if(res.statusCode == 200){
-      setState(() {
-        profile = json.decode(res.body) as List;
-        loading = false;
-      });
-    }
+    final res = await http.get('https://test1-messenger-api.herokuapp.com/api/users/me', headers: {
+      HttpHeaders.authorizationHeader: 'Bearer $token'
+    });
+
+    setState(() {
+      profile = json.decode(res.body) as List;
+      loading = false;
+    });
+
+    print(profile[0]);
   }
 
   @override
@@ -82,7 +86,6 @@ class APIBody extends State<Api> {
             child: InkWell(
               onTap: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
-
                 showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -99,7 +102,7 @@ class APIBody extends State<Api> {
                           FlatButton(
                             child: Text('Yes'),
                             onPressed: (){
-                              prefs.setString('username', null);
+                              prefs.setString('email', null);
                               Navigator.pushReplacementNamed(context, "/signin");
                             },
                           ),
@@ -115,7 +118,7 @@ class APIBody extends State<Api> {
           )
         ],
       ),
-      drawer: Drawer(
+      drawer: profile.length == 0 ? Icon(Icons.list) : Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -133,9 +136,18 @@ class APIBody extends State<Api> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: profile.length == 0 ? Text('Hai') :  Text(profile[0]['name']),
-                    ),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            profile.length == 0 ? Text('Hai!') :  Text(profile[0]['name']),
+                            Text('This should be your status!')
+                          ],
+                        ),
+                      ),
+                    )
                   ],
                 ),
               ),
