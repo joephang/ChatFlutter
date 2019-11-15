@@ -1,9 +1,16 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:toast/toast.dart';
 
 void main() => runApp(SignUps());
+
+String name = '';
+String email = '';
+String password = '';
+bool loading = false;
 
 class SignUps extends StatelessWidget {
   @override
@@ -30,67 +37,83 @@ class SignUp extends StatefulWidget {
 }
 
 class SignUpBody extends State<SignUp> {
-  @override
-
-  String name = '';
-  String email = '';
-  String password = '';
-  bool loading = false;
 
   Future _signUp() async {
-    if(name != '' && email != '' && password != '') {
       final res = await http.post(
           'https://test1-messenger-api.herokuapp.com/api/users',
           body: {
             'name': name,
             'email': email,
             'password': password,
-          }
+          },
       );
-
       return res;
-    } else {
-      return 'Error';
-    }
   }
 
   main() async {
     final sign = new SignUpBody();
+    if(name == '' || email == '' || password == '') {
+      setState(() {
+        loading = false;
+      });
+      Toast.show('Please fill all the form', context);
+    } else {
+      setState(() {
+        loading = true;
+      });
+      try{
+        final res = await sign._signUp();
 
-    try{
-      final res = await sign._signUp();
-      print(res.body);
-
-      switch(res.statusCode){
-        case 201: {
-          setState(() {
-            email = '';
-            password = '';
-            name = '';
-            loading=false;
-          });
-          Toast.show('Register Succeed!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
-          Navigator.pop(context, ':(');
+        switch(res.statusCode){
+          case 201: {
+            setState(() {
+              print(res.body);
+              email = '';
+              password = '';
+              name = '';
+              loading=false;
+            });
+            Toast.show('Register Succeed!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+            Navigator.pop(context, ':(');
+          }
+          break;
+          case 400 : {
+            print(res.statusCode);
+            print(res.body);
+            setState(() {
+              loading=false;
+              email = '';
+              password = '';
+              name = '';
+            });
+            var response = json.decode(res.body);
+            String message = response['message'];
+            Toast.show(message, context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+          }
+          break;
+          default: {
+            print(res.body);
+            setState(() {
+              loading=false;
+              email = '';
+              password = '';
+              name = '';
+            });
+            Toast.show('Please recheck your datas!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+            Navigator.pop(context, ':(');
+          }
         }
-        break;
-        case 400 : {
-          print(res.body);
-          Toast.show('Error Unidentified', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
-        }
-        break;
-        default: {
-          setState(() {
-            loading=false;
-          });
-          Toast.show('Please recheck your datas!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
-          Navigator.pop(context, ':(');
-        }
+      } catch (err) {
+        setState(() {
+          loading=false;
+        });
+        Toast.show('Unknown Error!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+        print('Catch Error : $err');
       }
-    } catch (err) {
-      Toast.show('Unknown Error!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
-      print(err);
     }
   }
+
+  @override
 
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -143,9 +166,6 @@ class SignUpBody extends State<SignUp> {
           ),
           RaisedButton(
             onPressed: () {
-              setState(() {
-                loading = true;
-              });
               main();
             },
             child: Text('Signup!'),

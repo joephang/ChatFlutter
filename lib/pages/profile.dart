@@ -8,6 +8,15 @@ import 'package:toast/toast.dart';
 
 void main() => runApp(Profile());
 
+TextEditingController nameController = TextEditingController();
+TextEditingController usernameController = TextEditingController();
+
+var name = '';
+var username = '';
+var defUser = '';
+var defName = '';
+String lol;
+
 class Response {
   String message;
 
@@ -32,56 +41,89 @@ class Profile extends StatefulWidget {
   _Profile createState() => _Profile(profiles: profiled);
 }
 
-TextEditingController nameController = TextEditingController();
-TextEditingController usernameController = TextEditingController();
-TextEditingController passwordController = TextEditingController();
-
-var name = '';
-var username = '';
-var password = '';
-String lol;
-
 class _Profile extends State<Profile>{
 
+  Future deleteUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final res = await http.delete('https://test1-messenger-api.herokuapp.com/api/users/',
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token'
+      }
+    );
+
+    return res;
+  }
+
+  main() async {
+    final prof = new _Profile(profiles: profiles);
+    final res = await prof.deleteUser();
+
+    Navigator.pop(context);
+    Navigator.pushReplacementNamed(context, '/signin');
+    Toast.show('Should be deleted', context);
+  }
+
   _update() async {
-    print('Pressed');
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
-    final res = await http.put(
-        'https://test1-messenger-api.herokuapp.com/api/users/'+profiles[0]['_id'],
-        body: {
-          'name': name,
-          'email': username,
-        },
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer $token'
+    if(username == defUser){
+      final res = await http.put(
+          'https://test1-messenger-api.herokuapp.com/api/users',
+          body: {
+            'name': name,
+          },
+          headers: {
+            HttpHeaders.authorizationHeader: 'Bearer $token'
+          });
+
+      if(res.statusCode == 200){
+        Toast.show('Update Success!', context);
+        Navigator.pop(context);
+      } else {
+
+        var decodedd = json.decode(res.body);
+
+        setState(() {
+          lol = decodedd['message'];
         });
-
-    if(res.statusCode == 200){
-      Toast.show('Update Success!', context);
-      Navigator.pop(context);
-    } else {
-      print(res.body);
-
-      var decodedd = json.decode(res.body);
-
-      setState(() {
-        lol = decodedd['message'];
-      });
-
-      print(lol == 'forbidden this is not your account');
 
 //      Response wow = new Response.fromJson(json.decode(res.body));
 //      print(wow.message);
+      }
+    } else if (name == defName){
+      final res = await http.put(
+          'https://test1-messenger-api.herokuapp.com/api/users',
+          body: {
+            'email': username,
+          },
+          headers: {
+            HttpHeaders.authorizationHeader: 'Bearer $token'
+          });
+
+      if(res.statusCode == 200){
+        Toast.show('Update Success!', context);
+        Navigator.pop(context);
+      } else {
+
+        var decodedd = json.decode(res.body);
+
+        setState(() {
+          lol = decodedd['message'];
+        });
+
+//      Response wow = new Response.fromJson(json.decode(res.body));
+//      print(wow.message);
+      }
     }
   }
 
-  @override
-
   List profiles = List();
 
+  @override
   _Profile ({Key key, @required this.profiles});
 
   initState() {
@@ -89,13 +131,11 @@ class _Profile extends State<Profile>{
     this.setState((){
       nameController = TextEditingController(text: profiles[0]['name']);
       usernameController = TextEditingController(text: profiles[0]['email']);
-      passwordController = TextEditingController(text: profiles[0]['password']);
       name = profiles[0]['name'];
       username = profiles[0]['email'];
-      password = profiles[0]['password'];
+      defName = profiles[0]['name'];
+      defUser = profiles[0]['email'];
     });
-
-    print(profiles[0]['email']);
   }
 
   Widget build(BuildContext context) {
@@ -108,7 +148,7 @@ class _Profile extends State<Profile>{
             padding: const EdgeInsets.all(12.0),
             child: IconButton(
               icon: Icon(Icons.check),
-              onPressed: () {
+              onPressed: username == defUser && name == defName ? null : () {
                 _update();
               },
             ),
@@ -145,6 +185,7 @@ class _Profile extends State<Profile>{
         padding: const EdgeInsets.all(8.0),
         child: Center(
           child: Column(
+            mainAxisSize: MainAxisSize.max,
             children: <Widget>[
               ListTile(
                 leading: Icon(Icons.account_circle),
@@ -174,19 +215,41 @@ class _Profile extends State<Profile>{
                   },
                 ),
               ),
-              ListTile(
-                leading: Icon(Icons.vpn_key),
-                title: TextField(
-                  keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Password'
+              Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: RaisedButton(
+                        color: Colors.red,
+                        child: Text('Delete Accout'),
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Are you sure to Delete Account?'),
+
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      child: Text('No'),
+                                      onPressed: (){
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    FlatButton(
+                                      child: Text('Yes'),
+                                      onPressed: (){
+                                        main();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              });
+                        }),
                   ),
-                  onChanged: (text) {
-                    password=text;
-                  },
                 ),
-              ),
+              )
             ],
           ),
         ),

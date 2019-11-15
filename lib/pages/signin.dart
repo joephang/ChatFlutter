@@ -58,8 +58,6 @@ class SignInn extends State<Signins>{
 
     try{
       final res = await sign._signIn();
-      print('this is main');
-      print(res.body);
 
       switch(res.statusCode) {
         case 200:
@@ -121,7 +119,7 @@ class SignInn extends State<Signins>{
               controller: userController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Username',
+                labelText: 'Email',
               ),
               onChanged: (text) {
                 setState(() {

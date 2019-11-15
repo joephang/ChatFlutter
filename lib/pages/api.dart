@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:chats/main.dart';
 import 'package:chats/pages/Details.dart';
 import 'package:chats/pages/profile.dart';
 import 'package:flutter/material.dart';
@@ -34,14 +33,12 @@ class APIBody extends State<Api> {
     setState(() {
       loading = true;
     });
-
     final res = await http.get('https://jsonplaceholder.typicode.com/photos');
     if(res.statusCode == 200){
       setState(() {
         list = json.decode(res.body) as List;
       });
-
-      getProfile();
+      main();
     } else {
       setState(() {
         loading = false;
@@ -50,14 +47,24 @@ class APIBody extends State<Api> {
     }
   }
 
-  getProfile() async {
+  Future profileGet() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     final token = await prefs.getString('token');
-
     final res = await http.get('https://test1-messenger-api.herokuapp.com/api/users/me', headers: {
       HttpHeaders.authorizationHeader: 'Bearer $token'
     });
+
+    return res;
+  }
+
+  main() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final body = new APIBody();
+    final res = await body.profileGet();
+
+//    prefs.setStringList('user', json.decode(res.body) as List);
+//    var prof = prefs.getStringList('user');
 
     setState(() {
       profile = json.decode(res.body) as List;
@@ -78,45 +85,10 @@ class APIBody extends State<Api> {
     return Scaffold(
       appBar: AppBar(
         title: Text('API GET'),
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: InkWell(
-              onTap: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('SignOut?'),
-                        content: Text('Are you sure to SignOut?'),
-                        actions: <Widget>[
-                          FlatButton(
-                            child: Text('No'),
-                            onPressed: (){
-                              Navigator.pop(context);
-                            },
-                          ),
-                          FlatButton(
-                            child: Text('Yes'),
-                            onPressed: (){
-                              prefs.setString('email', null);
-                              Navigator.pushReplacementNamed(context, "/signin");
-                            },
-                          ),
-                        ],
-                      );
-                    }
-                );
-              },
-              child: Center(
-                child: Text('Log Out'),
-              ),
-            ),
-          )
-        ],
       ),
-      drawer: profile.length == 0 ? Icon(Icons.list) : Drawer(
+      drawer: profile.length == 0 ?
+      Icon(Icons.list) :
+      Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -153,25 +125,69 @@ class APIBody extends State<Api> {
                 color: Colors.blue
               ),
             ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Profile'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Profile(profiled: profile,),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.person_add),
-              title: Text('Add Friend!'),
-              onTap: (){
-                Toast.show('Add Friend :3', context);
-              },
+            Column(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                ListTile(
+                  leading: Icon(Icons.person),
+                  title: Text('Profile'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Profile(profiled: profile,),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.person_add),
+                  title: Text('Add Friend!'),
+                  onTap: (){
+                    Toast.show('Add Friend :3', context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('Settings'),
+                  onTap: (){
+                    Toast.show('Setting Page', context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.exit_to_app),
+                  title: Text('Sign Out'),
+                  onTap: () async {
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('SignOut?'),
+                            content: Text('Are you sure to Sign Out?'),
+                            actions: <Widget>[
+                              FlatButton(
+                                child: Text('No'),
+                                onPressed: (){
+                                  Navigator.pop(context);
+                                },
+                              ),
+                              FlatButton(
+                                child: Text('Yes'),
+                                onPressed: (){
+                                  prefs.setString('email', null);
+                                  Navigator.pop(context);
+                                  Navigator.pushReplacementNamed(context, "/signin");
+                                },
+                              ),
+                            ],
+                          );
+                        }
+                    );
+                  },
+                ),
+              ],
             )
           ],
         ),
