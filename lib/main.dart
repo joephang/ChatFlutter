@@ -21,32 +21,40 @@ class MyApp extends StatefulWidget {
 
 class _MyHomePage extends State<MyApp>{
 
-  userName() async {
+  Future<String> getUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String username = prefs.getString('email');
     return username;
+  }
+
+  main() async {
+    final home = new _MyHomePage();
+    try{
+      final result = await home.getUserName();
+      print(result);
+      if(result == null){
+        this.setState(
+                (){
+              loading = false;
+              logged = false;
+            }
+        );
+      } else {
+        this.setState((){
+          logged = true;
+          loading = false;
+        });
+      }
+    } catch (err) {
+      print(err);
+    }
   }
 
   @override
 
   initState() {
     super.initState();
-
-    userName().then((result) => {
-      if(result == null){
-        this.setState(
-            (){
-              loading = false;
-              logged = false;
-            }
-        )
-      } else {
-        this.setState((){
-          logged = true;
-          loading = false;
-        })
-      }
-    });
+    main();
   }
 
   Widget build(BuildContext context) {

@@ -10,15 +10,15 @@ import 'package:toast/toast.dart';
 
 void main() => runApp(Api());
 
-class Api extends StatefulWidget {
-  @override
-  APIBody createState() => APIBody();
-}
-
 var loading = false;
 List list = List();
 var email;
 List profile = List();
+
+class Api extends StatefulWidget {
+  @override
+  APIBody createState() => APIBody();
+}
 
 class APIBody extends State<Api> {
 
@@ -63,8 +63,6 @@ class APIBody extends State<Api> {
       profile = json.decode(res.body) as List;
       loading = false;
     });
-
-    print(profile[0]);
   }
 
   @override

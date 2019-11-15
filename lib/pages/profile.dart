@@ -1,9 +1,26 @@
+import 'dart:io';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 
 void main() => runApp(Profile());
+
+class Response {
+  String message;
+
+  Response({
+    this.message
+  });
+
+  factory Response.fromJson(Map<String, dynamic> parsedJson){
+    return Response(
+      message: parsedJson['message']
+    );
+  }
+}
 
 class Profile extends StatefulWidget {
 
@@ -22,6 +39,7 @@ TextEditingController passwordController = TextEditingController();
 var name = '';
 var username = '';
 var password = '';
+String lol;
 
 class _Profile extends State<Profile>{
 
@@ -29,13 +47,16 @@ class _Profile extends State<Profile>{
     print('Pressed');
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String local = prefs.getString('local');
+    final token = prefs.getString('token');
 
     final res = await http.put(
-        'http://$local:8081/api/user/update/$username',
+        'https://test1-messenger-api.herokuapp.com/api/users/'+profiles[0]['_id'],
         body: {
           'name': name,
-          'password': password,
+          'email': username,
+        },
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token'
         });
 
     if(res.statusCode == 200){
@@ -43,6 +64,17 @@ class _Profile extends State<Profile>{
       Navigator.pop(context);
     } else {
       print(res.body);
+
+      var decodedd = json.decode(res.body);
+
+      setState(() {
+        lol = decodedd['message'];
+      });
+
+      print(lol == 'forbidden this is not your account');
+
+//      Response wow = new Response.fromJson(json.decode(res.body));
+//      print(wow.message);
     }
   }
 

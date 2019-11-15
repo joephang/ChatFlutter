@@ -35,20 +35,31 @@ class SignUpBody extends State<SignUp> {
   String name = '';
   String email = '';
   String password = '';
-
   bool loading = false;
 
-  _SignUp() async {
-
-    if(name != '' && email != '' && password != ''){
+  Future _signUp() async {
+    if(name != '' && email != '' && password != '') {
       final res = await http.post(
           'https://test1-messenger-api.herokuapp.com/api/users',
           body: {
-            'name' : name,
-            'email' : email,
-            'password' : password,
+            'name': name,
+            'email': email,
+            'password': password,
           }
       );
+
+      return res;
+    } else {
+      return 'Error';
+    }
+  }
+
+  main() async {
+    final sign = new SignUpBody();
+
+    try{
+      final res = await sign._signUp();
+      print(res.body);
 
       switch(res.statusCode){
         case 201: {
@@ -66,11 +77,19 @@ class SignUpBody extends State<SignUp> {
           print(res.body);
           Toast.show('Error Unidentified', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
         }
+        break;
+        default: {
+          setState(() {
+            loading=false;
+          });
+          Toast.show('Please recheck your datas!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+          Navigator.pop(context, ':(');
+        }
       }
-    } else {
-      Toast.show('Please Fill all the Form!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+    } catch (err) {
+      Toast.show('Unknown Error!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+      print(err);
     }
-
   }
 
   Widget build(BuildContext context) {
@@ -127,7 +146,7 @@ class SignUpBody extends State<SignUp> {
               setState(() {
                 loading = true;
               });
-              _SignUp();
+              main();
             },
             child: Text('Signup!'),
           ),

@@ -32,38 +32,48 @@ class Signins extends StatefulWidget {
 
 class SignInn extends State<Signins>{
 
-  _setString() async {
+  Future _signIn() async {
+    if(email != null && Password != null){
+
+      final res = await http.post(
+          'https://test1-messenger-api.herokuapp.com/api/login',
+          body: {
+            'email' : email,
+            'password' : Password
+          }
+      );
+      return res;
+    } else {
+      return 'Internal Error';
+    }
+  }
+
+  main() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final sign = new SignInn();
 
     setState(() {
-      loading=true;
+      loading = true;
     });
 
-    if(email != null && Password != null){
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+    try{
+      final res = await sign._signIn();
+      print('this is main');
+      print(res.body);
 
-        final res = await http.post(
-            'https://test1-messenger-api.herokuapp.com/api/login',
-            body: {
-              'email' : email,
-              'password' : Password
-            }
-        );
-
-        switch(res.statusCode){
-          case 200: {
+      switch(res.statusCode) {
+        case 200:
+          {
             setState(() {
               token = json.decode(res.body) as List;
             });
+
             prefs.setString('token', token[0]['token']);
-
-            final tok = await prefs.getString('token');
-
-            print(tok);
-
-            Navigator.pushReplacementNamed(context, "/api");
             prefs.setString('email', email);
 
-            setState((){
+            Navigator.pushReplacementNamed(context, "/api");
+
+            setState(() {
               userController.clear();
               passController.clear();
               email = null;
@@ -71,23 +81,30 @@ class SignInn extends State<Signins>{
               loading = false;
             });
 
-            Toast.show("Signed In!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+            Toast.show("Signed In!", context, duration: Toast.LENGTH_SHORT,
+                gravity: Toast.BOTTOM);
           }
           break;
-          default:{
-            this.setState((){
+          default:
+          {
+            this.setState(() {
               userController.clear();
               passController.clear();
               email = null;
               Password = null;
               loading = false;
             });
-            Toast.show("Please re-check your email and password!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
+            Toast.show("Please re-check your email and password!", context,
+                duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
           }
           break;
-        }
-    } else {
+      }
+    } catch (err) {
+      print(err);
       Toast.show('Please Fill the Form', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+      setState(() {
+        loading = false;
+      });
     }
   }
 
@@ -136,7 +153,8 @@ class SignInn extends State<Signins>{
                 padding: const EdgeInsets.all(8.0),
                 child: RaisedButton(
                   onPressed: () {
-                    _setString();
+//                    _setString();
+                    main();
                   },
                   child: Text('Sign In!'),
                 ),
