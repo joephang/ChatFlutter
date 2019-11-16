@@ -34,7 +34,6 @@ class SignInn extends State<Signins>{
 
   Future _signIn() async {
     if(email != null && Password != null){
-
       final res = await http.post(
           'https://test1-messenger-api.herokuapp.com/api/login',
           body: {
@@ -98,7 +97,6 @@ class SignInn extends State<Signins>{
           break;
       }
     } catch (err) {
-      print(err);
       Toast.show('Please Fill the Form', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
       setState(() {
         loading = false;

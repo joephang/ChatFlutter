@@ -39,25 +39,27 @@ class SignUp extends StatefulWidget {
 class SignUpBody extends State<SignUp> {
 
   Future _signUp() async {
-      final res = await http.post(
-          'https://test1-messenger-api.herokuapp.com/api/users',
-          body: {
-            'name': name,
-            'email': email,
-            'password': password,
-          },
-      );
-      return res;
-  }
-
-  main() async {
-    final sign = new SignUpBody();
     if(name == '' || email == '' || password == '') {
       setState(() {
         loading = false;
       });
-      Toast.show('Please fill all the form', context);
+      return 'fail';
     } else {
+      final res = await http.post(
+        'https://test1-messenger-api.herokuapp.com/api/users',
+        body: {
+          'name': name,
+          'email': email,
+          'password': password,
+        },
+      );
+      return res;
+    }
+  }
+
+  main() async {
+    final sign = new SignUpBody();
+
       setState(() {
         loading = true;
       });
@@ -107,10 +109,9 @@ class SignUpBody extends State<SignUp> {
         setState(() {
           loading=false;
         });
-        Toast.show('Unknown Error!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+        Toast.show('Please Fill All the Field!', context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
         print('Catch Error : $err');
       }
-    }
   }
 
   @override

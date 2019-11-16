@@ -63,9 +63,6 @@ class APIBody extends State<Api> {
     final body = new APIBody();
     final res = await body.profileGet();
 
-//    prefs.setStringList('user', json.decode(res.body) as List);
-//    var prof = prefs.getStringList('user');
-
     setState(() {
       profile = json.decode(res.body) as List;
       loading = false;
