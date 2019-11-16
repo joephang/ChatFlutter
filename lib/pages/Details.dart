@@ -31,20 +31,25 @@ class Details extends StatelessWidget {
                                 itemCount: 20,
                                 itemBuilder: (BuildContext context, int index){
                                   return ListTile(
-                                    contentPadding: EdgeInsets.all(8.0),
-                                    leading: Text('Sender'),
+//                                    contentPadding: EdgeInsets.all(8.0),
+                                    leading: Column(
+                                      children: <Widget>[
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(30.0),
+                                          child: Image.network(
+                                            list[num]['url'],
+                                            height: 30.0,
+                                            width: 30.0,
+                                          ),
+                                        ),
+                                        Text('Sender'),
+                                      ],
+                                    ),
                                     title: Text(list[num]['title'],overflow: TextOverflow.ellipsis,
                                       maxLines: 5,),
                                     subtitle: Text('Time Stamp?'),
                                   );
                                 }
-//                                Text(list[num]['title']),
-//                                Image.network(
-//                                  list[num]['url'],
-//                                  fit: BoxFit.cover,
-//                                  height: 40.0,
-//                                  width: 40.0,
-//                                ),
                             );
                           },
                       )
@@ -64,7 +69,7 @@ class Details extends StatelessWidget {
                               color: Colors.grey,
                             ),
                           ),
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                         Material(
                           child: new Container(
@@ -77,7 +82,7 @@ class Details extends StatelessWidget {
                               color: Colors.grey,
                             ),
                           ),
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
 
                         // Edit text
@@ -107,14 +112,14 @@ class Details extends StatelessWidget {
                               color: Colors.grey,
                             ),
                           ),
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ],
                     ),
                     width: double.infinity,
                     height: 50.0,
                     decoration: new BoxDecoration(
-                        border: new Border(top: new BorderSide(color: Colors.grey, width: 0.5)), color: Colors.white),
+                        border: new Border(top: new BorderSide(color: Colors.grey, width: 0.5)), color: Colors.black),
                   ),
                 ],
               )
